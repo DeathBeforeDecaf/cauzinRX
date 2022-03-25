@@ -1,13 +1,20 @@
 #include <time.h> // clock_t
 
+#ifdef __BORLANDC__
+#include "src/strprx16/cznstrip.h"
+#include "src/strprx16/serlib.h"
+#include "src/strprx16/stdtypes.h"
+#include "src/strprx16/support.h"
+#include "src/strprx16/syscfg.h"
+#elif _MSC_VER
 #include "cznstrip.h"
 #include "serlib.h"
 #include "stdtypes.h"
 #include "support.h"
 #include "syscfg.h"
+#endif
 
 extern struct SystemConfiguration settings;
-
 
 enum CZNRXResult captureTimingData( struct StripSequenceType* sequence )
 {
@@ -115,16 +122,7 @@ void captureTimingAndSync( bool isImmediate )
 
    enum CZNRXResult result = unknown_result;
 
-   uint16_t stripCount = 0;
-
    uint16_t index;
-
-   char option[] =
-   {
-      ' ',
-      'Q', 'q', 0x1B // ESC
-   };
-
 
    if ( false == isImmediate )
    {

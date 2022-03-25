@@ -1,13 +1,22 @@
+#include <dos.h> // FP_SEG()
 #include <errno.h> // errno
 #include <fcntl.h>  // _O_RDONLY
 #include <string.h> // memset(), strlen(), strcpy(), strncpy()
 #include <time.h> // clock_t, clock()
 
+#ifdef __BORLANDC__
+#include "src/strprx16/crc16.h"
+#include "src/strprx16/cznstrip.h"
+#include "src/strprx16/serlib.h"
+#include "src/strprx16/support.h"
+#include "src/strprx16/syscfg.h"
+#elif _MSC_VER
 #include "crc16.h"
 #include "cznstrip.h"
 #include "serlib.h"
 #include "support.h"
 #include "syscfg.h"
+#endif
 
 extern struct SystemConfiguration settings;
 
@@ -201,7 +210,7 @@ enum CZNRXResult parseStripContent( bool isImmediate, uint16_t expectedStripNumb
 
          case host_os:
          case file_count:
-         case category: 
+         case category:
          case os_type:
          case file_length:
          case file_name:
@@ -327,7 +336,7 @@ fprintf( stderr, "DEBUG: Expected StripNumber: %u, Actual StripNumber: %u\n", ex
                      
                      for ( j = 2; j < ( stripNumber - 1 ); j++ )
                      {
-                        dStrip = dStrip->nextStrip;   
+                        dStrip = dStrip->nextStrip;
                      }
 
                      dStrip->nextStrip = nextStrip;
@@ -481,7 +490,7 @@ fprintf( stderr, "DEBUG: Expected StripNumber: %u, Actual StripNumber: %u\n", ex
             {
                sequence->lStrip.file[ fileCounter ].sizeBytes = ( ( ( ( uint16_t )latest ) << 8 ) | previous );
             }
-            else if ( 3 == fieldWidth ) 
+            else if ( 3 == fieldWidth )
             {
                sequence->lStrip.file[ fileCounter ].sizeBytes |= ( ( ( uint32_t )latest ) << 16 );
 
@@ -649,7 +658,7 @@ fprintf( stderr, "DEBUG: Expected StripNumber: %u, Actual StripNumber: %u\n", ex
          case end_of_strip:
          {
             ++fieldWidth;
-            
+
             //  CFT: 0x00
             // STAT: 0x0A or 0x08
 
@@ -873,7 +882,7 @@ enum CZNRXResult readSoftstrip( bool isImmediate, uint16_t stripNumber, struct S
          last = next;
 
          next = Ready_Serial();
- 
+
          if ( last != next )
          {
             if ( latch <= settings.latchThreshold )
@@ -887,7 +896,7 @@ enum CZNRXResult readSoftstrip( bool isImmediate, uint16_t stripNumber, struct S
          if ( settings.latchThreshold == latch )
          {
             // latch after ~1 sec reads (5 intervals)
-            i = settings.latchThreshold * settings.timeoutThreshold;  
+            i = settings.latchThreshold * settings.timeoutThreshold;
          }
 
          now = clock();
@@ -1021,7 +1030,11 @@ void saveStripSequenceData( bool isImmediate, uint16_t stripNumber, struct Strip
       ( sequence->stripEnd > sequence->stripContent )
       ? ( sequence->stripEnd - sequence->stripContent ) : 0;
 
+#ifdef __BORLANDC__
+   getcwd( startingDirectory, _MAX_PATH );
+#elif _MSC_VER
    _getcwd( startingDirectory, _MAX_PATH );
+#endif
 
    if ( 1 < stripNumber )
    {
@@ -1047,7 +1060,11 @@ void saveStripSequenceData( bool isImmediate, uint16_t stripNumber, struct Strip
 
       *index = '\0';
 
+#ifdef __BORLANDC__
+      if ( 0 == chdir( sequence->workingPath ) )
+#elif _MSC_VER
       if ( 0 == _chdir( sequence->workingPath ) )
+#endif
       {
          pathChanged = true;
       }
@@ -1081,7 +1098,11 @@ void saveStripSequenceData( bool isImmediate, uint16_t stripNumber, struct Strip
 
          *index = '\0';
 
+#ifdef __BORLANDC__
+         if ( 0 == chdir( sequence->workingPath ) )
+#elif _MSC_VER
          if ( 0 == _chdir( sequence->workingPath ) )
+#endif
          {
             pathChanged = true;
          }
@@ -1147,7 +1168,11 @@ void saveStripSequenceData( bool isImmediate, uint16_t stripNumber, struct Strip
       }
       while ( 0 < stripRemainingBytes );
 
+#ifdef __BORLANDC__
+      chdir( startingDirectory );
+#elif _MSC_VER
       _chdir( startingDirectory );
+#endif
    }
 }
 
@@ -1209,10 +1234,18 @@ int copyFile( char* source, char* target )
       return result;
    }
 
+#ifdef __BORLANDC__
+   FP_SEG( raw ) = segmentBuffer;
+#elif _MSC_VER
    _FP_SEG( raw ) = segmentBuffer;
+#endif
 
    // Open source file and create target, overwriting if necessary.
+#ifdef __BORLANDC__
+   if ( result = _dos_open( source, O_RDONLY, &hsource ) )
+#elif _MSC_VER
    if ( result = _dos_open( source, _O_RDONLY, &hsource ) )
+#endif
    {
       return result;
    }
@@ -1226,7 +1259,11 @@ int copyFile( char* source, char* target )
 
       _dos_write( 1, prompt, sizeof( prompt ) - 1, &ch );
 
+#ifdef __BORLANDC__
+      ch = bdos( 1, 0, 0 ) & 0x00FF;
+#elif _MSC_VER
       ch = _bdos( 1, 0, 0 ) & 0x00FF;
+#endif
 
       if ( ( 'y' == ch ) || ( 'Y' == ch ) )
       {
@@ -1285,7 +1322,11 @@ void mergeStripFileData( bool isImmediate, struct StripSequenceType* sequence )
    char* source;
    char* destination;
 
+#ifdef __BORLANDC__
+   getcwd( startingDirectory, _MAX_PATH );
+#elif _MSC_VER
    _getcwd( startingDirectory, _MAX_PATH );
+#endif
 
    if ( '\0' != settings.outputDirectory )
    {
@@ -1321,7 +1362,11 @@ void mergeStripFileData( bool isImmediate, struct StripSequenceType* sequence )
 
          *index = '\0';
 
+#ifdef __BORLANDC__
+         if ( 0 == chdir( sequenceDirectory ) )
+#elif _MSC_VER
          if ( 0 == _chdir( sequenceDirectory ) )
+#endif
          {
             pathChanged = true;
          }
@@ -1362,7 +1407,12 @@ void mergeStripFileData( bool isImmediate, struct StripSequenceType* sequence )
 
    if ( true == pathChanged )
    {
+#ifdef __BORLANDC__
+      chdir( startingDirectory );
+#elif _MSC_VER
       _chdir( startingDirectory );
+#endif
+
    }
 }
 

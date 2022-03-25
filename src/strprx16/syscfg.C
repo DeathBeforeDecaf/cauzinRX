@@ -1,22 +1,8 @@
+#ifdef __BORLANDC__
+#include "src/strprx16/syscfg.h"
+#elif _MSC_VER
 #include "syscfg.h"
-
-/*
-struct SystemConfiguration
-{
-   int16_t readerPort; // = 1
-   int16_t readerPortOpen; // = 0;
-
-   uint16_t MAX_STRIP_SIZE; // = 8192
-
-   uint16_t readIntervalMS; // 250ms
-
-   uint8_t  latchThreshold; // 4
-   uint8_t  timeoutThreshold; // 6 ( * latch Threshold )
-
-   char workingDirectory[ _MAX_PATH ];
-   char outputDirectory[ _MAX_PATH ];
-};
-*/
+#endif
 
 struct SystemConfiguration settings = { 0 };
 
@@ -33,7 +19,6 @@ void SystemConfiguration_Initialize( int argC, char* argV[] )
 
    settings.latchThreshold = 4;
    settings.timeoutThreshold = 6; // ( timeoutThreshold * latchThreshold )
-
 
 
    strcpy( settings.workingDirectory, argV[ 0 ] );
@@ -84,7 +69,7 @@ void SystemConfiguration_Initialize( int argC, char* argV[] )
       if ( lastBreak + 1 != index )
       {
          *index = '\\';
-      }      
+      }
 
       createSubdirectory( settings.outputDirectory );
    }

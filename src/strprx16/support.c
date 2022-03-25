@@ -1,5 +1,10 @@
+#ifdef __BORLANDC__
+#include "src/strprx16/support.h"
+#include "src/strprx16/syscfg.h"
+#elif _MSC_VER
 #include "support.h"
 #include "syscfg.h"
+#endif
 
 extern struct SystemConfiguration settings;
 
@@ -14,14 +19,22 @@ void printIdentity( char* filename )
 
 void printVersion( char* filename )
 {
+#ifdef __BORLANDC__
+   struct stat status = { 0 };
+#elif _MSC_VER
    struct _stat status = { 0 };
+#endif
 
    uint32_t versionID;
 
    fputs( "  Version 0.1", stdout );
 
+#ifdef __BORLANDC__
+   if ( ( 0 == stat( filename, &status ) ) && ( status.st_mode & S_IFREG ) )
+#elif _MSC_VER
    if ( ( 0 == _stat( filename, &status ) ) && ( status.st_mode & _S_IFREG ) )
-   {         
+#endif
+   {
       fputs( " (", stdout );
 
       versionID = status.st_mtime;
@@ -49,7 +62,7 @@ void printUsage()
    printf( "      C  :  capture timing and synchronization data to the host\n" );
    printf( "      B  :  bitwise test mode evaluate strip to determine readability\n" );
    printf( "      H  :  harvest optical scan in slices (requires special cable and setup)\n\n" );
-      
+
    printf( "EXAMPLES:\n" );
    printf( "   cauzinrx 1 R     : read a strip sequence from Softstrip reader on COM1\n" );
    printf( "   cauzinrx 2 I     : verify reader on COM2 returns a hardware revision string\n\n" );
@@ -72,7 +85,7 @@ enum CMDLineResultType processCommandLineArguments( int16_t argC, char* argV[] )
 
          if ( ( explicitPort > 0 ) && ( explicitPort < 5 ) )
          {
-            settings.readerPort = explicitPort;         
+            settings.readerPort = explicitPort;
 
             result = cmdln_setup;
          }
@@ -312,10 +325,10 @@ char prompt( char* promptStr, const char option[], uint8_t optionCount, char* op
          fputc( result, stdout );
       }
 
-      fputc( '\n', stdout );      
+      fputc( '\n', stdout );
    }
    while ( '\0' == result );
-   
+
    return result;
 }
 
@@ -446,7 +459,7 @@ void restrictToAllowedCharacters( char* input, char substitute )
          {
             *index = substitute;
          }
-      }      
+      }
    }
 }
 
@@ -496,10 +509,10 @@ void normalize( char* input )
 
       while ( '\0' != next )
       {
-         if ( NULL == lhs ) 
+         if ( NULL == lhs )
          {
             if ( ( ( 'A' <= next ) && ( 'Z' >= next ) )
-                 || ( ( 'a' <= next ) && ( 'z' >= next ) ) ) 
+                 || ( ( 'a' <= next ) && ( 'z' >= next ) ) )
             {
                lhs = &( trimmedInput[ index ] );
             }
@@ -520,7 +533,7 @@ void normalize( char* input )
          else if ( ( NULL != lastDot ) && ( NULL == rhs ) )
          {
             rhs = &( trimmedInput[ index ] );
-         }         
+         }
 
          ++index;
 
@@ -582,12 +595,20 @@ void normalize( char* input )
 
 void createSubdirectory( char* path )
 {
+#ifdef __BORLANDC__
+   struct stat info = { 0 };
+#elif _MSC_VER
    struct _stat info = { 0 };
+#endif
 
    char* index;
    char  separator;
 
+#ifdef __BORLANDC__
+   if ( 0 != stat( path, &info ) )
+#elif _MSC_VER
    if ( 0 != _stat( path, &info ) )
+#endif
    {
       errno = 0;
 
@@ -601,11 +622,19 @@ void createSubdirectory( char* path )
 
             *index = '\0';
 
+#ifdef __BORLANDC__
+            if ( 0 != stat( path, &info ) )
+#elif _MSC_VER
             if ( 0 != _stat( path, &info ) )
+#endif
             {
                errno = 0;
 
+#ifdef __BORLANDC__
+               mkdir( path );
+#elif _MSC_VER
                _mkdir( path );
+#endif
             }
 
             *index = separator;
@@ -627,7 +656,11 @@ void saveAs( char* savePrompt, struct StripSequenceType* sequence )
 
    char outputPath[ _MAX_PATH ] = { 0 };
 
+#ifdef __BORLANDC__
+   struct stat fileinfo = { 0 };
+#elif _MSC_VER
    struct _stat fileinfo = { 0 };
+#endif
 
    char selection = 'N';
 
@@ -687,7 +720,11 @@ void saveAs( char* savePrompt, struct StripSequenceType* sequence )
 
          strcpy( index, filename );
 
+#ifdef __BORLANDC__
+         if ( 0 == stat( outputPath, &fileinfo ) )
+#elif _MSC_VER
          if ( 0 == _stat( outputPath, &fileinfo ) )
+#endif
          {
             selection =
                prompt( "Overwrite existing file (Y|N|X)? ", option, sizeof( option ) / sizeof( option[ 0 ] ),

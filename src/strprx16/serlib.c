@@ -1,24 +1,18 @@
 
-// I N C L U D E S ///////////////////////////////////////////////////////////
-
-#include "serlib.h"
-
-// G L O B A L S /////////////////////////////////////////////////////////////
-
 #ifdef __BORLANDC__
+#include "src/strprx16/serlib.h"
+
 #define   INP(x)       inp((x))
 #define   OUTP(x,y)    outp((x),(y))
 #elif _MSC_VER
+#include "serlib.h"
+
 #define   INP(x)       _inp((x))
 #define   OUTP(x,y)    _outp((x),(y))
 #endif
 
 // retain the original com port interrupt handler
-#ifdef __BORLANDC__
-void interrupt ( _far *prevISR )( ... );
-#elif _MSC_VER
 void ( _interrupt _far *prevISR )();
-#endif
 
 char ser_buffer_circ[ CIRCULAR_BUFFER_SIZE ];
 
@@ -39,11 +33,7 @@ int16_t open_port;                      // the currently open port
 // next character out of the receive buffer register 0 and places it into the
 // software buffer.
 
-#ifdef __BORLANDC__
-void _interrupt _far SerialISR( ... )
-#elif _MSC_VER
 void _interrupt _far SerialISR( void )
-#endif
 {
    // advise other functions so the buffer doesn't get corrupted
    ser_busy = 1;

@@ -3,9 +3,15 @@
 #include <stdlib.h> // atoi()
 #include <string.h> // strcmp()
 
+#ifdef __BORLANDC__
+#include "src/strprx16/stdtypes.h"
+#include "src/strprx16/support.h"
+#include "src/strprx16/syscfg.h"
+#elif _MSC_VER
 #include "strprx16/stdtypes.h"
 #include "strprx16/support.h"
 #include "strprx16/syscfg.h"
+#endif
 
 extern struct SystemConfiguration settings;
 

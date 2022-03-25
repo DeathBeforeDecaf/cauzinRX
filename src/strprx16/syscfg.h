@@ -7,8 +7,13 @@
 #include <string.h> // strcpy()
 #include <time.h>   // CLOCKS_PER_SEC
 
+#ifdef __BORLANDC__
+#include "src/strprx16/stdtypes.h"
+#include "src/strprx16/support.h"
+#elif _MSC_VER
 #include "stdtypes.h"
 #include "support.h"
+#endif
 
 struct SystemConfiguration
 {

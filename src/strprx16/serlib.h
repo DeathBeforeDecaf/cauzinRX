@@ -8,9 +8,11 @@
 #include <dos.h> // _dos_setvect()
 #include <stdio.h>
 
+#ifdef __BORLANDC__
+#include "src/strprx16/stdtypes.h"
+#elif _MSC_VER
 #include "stdtypes.h"
-
-// #include "czcmds.h"  // CZSerial
+#endif
 
 // D E F I N E S  ////////////////////////////////////////////////////////////
 
@@ -87,11 +89,11 @@
 
 // E X T E R N S //////////////////////////////////////////////////////////////
 
-#ifdef __BORLANDC__
-extern void interrupt ( _far *prevISR )( ... );   // holds original com port interrupt handler
-#elif _MSC_VER
+// #ifdef __BORLANDC__
+// extern void interrupt ( _far *prevISR )( ... );   // holds original com port interrupt handler
+// #elif _MSC_VER
 extern void ( _interrupt _far *prevISR )();       // holds original com port interrupt handler
-#endif
+// #endif
 
 extern char                   ser_buffer_circ[];
 extern char*                  ser_buffer;
@@ -117,11 +119,11 @@ struct SerialRXBuffer
 
 // P R O T O T Y P E S ///////////////////////////////////////////////////////
 
-#ifdef __BORLANDC__
-void _interrupt _far SerialISR( ... );
-#elif _MSC_VER
+// #ifdef __BORLANDC__
+// void _interrupt _far SerialISR( ... );
+// #elif _MSC_VER
 void _interrupt _far SerialISR( void );
-#endif
+// #endif
 
 void Open_Serial( int16_t port_base, int16_t baud_divisor, int16_t configuration );
 void Close_Serial( int16_t port_base );

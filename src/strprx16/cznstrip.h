@@ -3,10 +3,13 @@
 
 #include <stdlib.h>  // MAX_PATH
 
+#ifdef __BORLANDC__
+#include "src/strprx16/serlib.h"
+#include "src/strprx16/stdtypes.h"
+#elif _MSC_VER
 #include "serlib.h"
 #include "stdtypes.h"
-
-
+#endif
 
 struct FileEntryType
 {

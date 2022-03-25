@@ -5,12 +5,18 @@
 #include <stdio.h>  // fputc(), fputs()
 #include <stdlib.h> // _MAX_PATH
 #include <string.h> // strlen()
-#include <sys\types.h> // struct _stat
-#include <sys\stat.h>  // stat()
+#include <sys/types.h> // struct _stat
+#include <sys/stat.h>  // stat()
 
+#ifdef __BORLANDC__
+#include "src/strprx16/cznstrip.h"
+#include "src/strprx16/serlib.h"
+#include "src/strprx16/stdtypes.h"
+#elif _MSC_VER
 #include "cznstrip.h"
 #include "serlib.h"
 #include "stdtypes.h"
+#endif
 
 enum CMDLineResultType
 {

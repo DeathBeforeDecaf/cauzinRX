@@ -1,4 +1,8 @@
+#ifdef __BORLANDC__
+#include "src/strprx16/crc16.h"
+#elif _MSC_VER
 #include "crc16.h"
+#endif
 
 uint16_t CRC16ANSI[] =
 {

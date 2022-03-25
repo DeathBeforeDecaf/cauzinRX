@@ -1,8 +1,13 @@
 #include <ctype.h> // isalnum(), ispunct(), isspace()
 #include <time.h> // clock_t
 
+#ifdef __BORLANDC__
+#include "src/strprx16/support.h"
+#include "src/strprx16/syscfg.h"
+#elif _MSC_VER
 #include "support.h"
 #include "syscfg.h"
+#endif
 
 extern struct SystemConfiguration settings;
 
